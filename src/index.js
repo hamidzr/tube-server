@@ -5,43 +5,47 @@ const express = require('express'),
   { exec } = require('child-process-promise'),
   app = express(),
   http = require('http').Server(app),
-  io = require('socket.io')(http);
+  debug = require('debug'),
+  io = require('socket.io')(http),
+  yt = require('./youtube')
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5000,
+  logger = {
+    log: debug('tube:server:log'),
+    error: debug('tube:server:error'),
+  };
 
 // parse post body
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// ensure crucial dirs exist
+fse.ensureDir('public/media');
+
 // serve static files in public dir
 app.use(express.static(path.join(__dirname,'../public')))
 
 // listen for socket connections
-io.on('connection', function(socket) {
-  console.log('a user connected');
-  socket.on('submission', function(msg) {
-    console.log(msg);
-  })
-  socket.on('disconnect', function(){
-    console.log('user disconnected');
-  });
-})
+// io.on('connection', function(socket) {
+//   logger.log('a user connected');
+//   socket.on('submission', function(msg) {
+//     logger.log(msg);
+//   })
+//   socket.on('disconnect', function(){
+//     logger.log('user disconnected');
+//   });
+// })
 
-app.get('/ls', function(req, res) {
-  let commandJson = req.body;
-  // TODO process the command.
-
-  // linux cli can be accessed like this
-  exec('ls')
-    .then(res => {
-      console.log(res.stdout);
+app.get('/ytdl/:id', function(req, res) {
+  let quality = req.query.quality || 'mq';
+  yt.dl({name: `test-${new Date().getTime()}`, id: req.params.id}, 'mp4', quality)
+    .then(path => {
+      // emit via socket and push status update
+      res.status(200).send(path.substring(6)); // or send the file
     })
-    .catch(console.error)
-  // respond
-  // we can also wait for the robot to do its thing before replying.
-  res.status(200).send('command received.');
+  // res.status(200).send('request received');
 });
 
 http.listen(port, function() {
-  console.log('Listening on ' + port);
+  logger.log('Listening on ' + port);
 });
