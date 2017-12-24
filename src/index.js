@@ -58,7 +58,11 @@ app.get('/yt/details/:id', function(req, res) {
 
 app.get('/yt/dl/:id', function(req, res) {
   let quality = req.query.quality || 'mq';
-  yt.dl({name: `test-${new Date().getTime()}`, id: req.params.id}, 'mp4', quality)
+  let id = req.params.id;
+  yt.details(id)
+    .then((info) => {
+      return yt.dl({name: info.title, id}, 'mp4', quality);
+    })
     .then(path => {
       // emit via socket and push status update
       res.status(200).send(path.substring(6)); // or send the file

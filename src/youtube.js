@@ -58,6 +58,7 @@ let dl = function(clip, format='mp4', quality='mq') {
   let cmd;
   let fQuality = quality === 'hq' ? '22' : '18/5/36/worst';
 
+  // TODO trim title
   if (format === 'mp4') {
     cmd = `youtube-dl -f ${fQuality} --write-sub --sub-lang en --max-filesize 500m ${url} -o ${path}`
   }
