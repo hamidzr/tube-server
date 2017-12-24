@@ -25,6 +25,14 @@ fse.ensureDir('public/media');
 // serve static files in public dir
 app.use(express.static(path.join(__dirname,'../public')))
 
+// allow cors
+function allowCORS(req, res, next) {
+  // res.header('Access-Control-Allow-Origin', req.hostname);
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
+};
+app.use(allowCORS);
+
 // listen for socket connections
 // io.on('connection', function(socket) {
 //   logger.log('a user connected');
@@ -36,7 +44,19 @@ app.use(express.static(path.join(__dirname,'../public')))
 //   });
 // })
 
-app.get('/ytdl/:id', function(req, res) {
+app.get('/yt/details/:id', function(req, res) {
+  logger.log('getting details for', req.params.id)
+  yt.details(req.params.id)
+    .then(info => {
+      res.status(200).send(info);
+    })
+    .catch(err => {
+      logger.error(err);
+      res.status(500).send();
+    });
+});
+
+app.get('/yt/dl/:id', function(req, res) {
   let quality = req.query.quality || 'mq';
   yt.dl({name: `test-${new Date().getTime()}`, id: req.params.id}, 'mp4', quality)
     .then(path => {

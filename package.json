@@ -11,6 +11,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.17.1",
     "child-process-promise": "^2.2.1",
     "express": "^4.16.2",
     "fs-extra": "^5.0.0",
