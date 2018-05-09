@@ -1,2 +1,2 @@
 # Tube Server
-simple headless server to grab videos from different sources
+simple headless server to proxy fetching videos from different sources go around censorship
